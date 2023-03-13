@@ -22,6 +22,7 @@ builder.Services.AddTransient<CreateProductCommandHandler>();
 builder.Services.AddTransient<DeleteProductCommandHandler>();
 builder.Services.AddTransient<GetAllProductQueryHandler>();
 builder.Services.AddTransient<GetByIdProductQueryHandler>();
+builder.Services.AddTransient<RabbitMQService>();
 
 
 builder.Services.AddMvc();
