@@ -34,7 +34,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> Get([FromQuery] GetByIdProductQueryRequest request)
         {
             GetByIdProductQueryResponse product = await _mediator.Send(request);
-            _rabbitMQService.SendMessage("Products Getted by Id.");
+            _rabbitMQService.SendMessage("Products Getted by Id");
             return Ok(product);
         }
         

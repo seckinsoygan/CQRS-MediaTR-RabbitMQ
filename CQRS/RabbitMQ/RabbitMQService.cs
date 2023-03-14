@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,41 @@ namespace CQRS.RabbitMQ
             var factory = new ConnectionFactory() { HostName = "localhost",UserName="guest",Password = "guest" };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "Last1",durable: false,exclusive: false,autoDelete: false,arguments: null);
-        }
+            var queueName = new string[] { "QueueA", "QueueB", "QueueC" };
+            
+            var exchangeName = "BestExchange";
+            var routing_keys = new[] { "Get", "Set" };
 
+            _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+
+
+            for (int i = 0; i < queueName.Length; i++)
+            {
+                for (int j = 0; j < routing_keys.Length; j++)
+                {
+                    _channel.QueueDeclare(queueName[i], durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    _channel.QueueBind(queueName[i], exchangeName, routing_keys[j]);
+                }
+            }
+        }
         public void SendMessage(string message)
         {
-            var body = Encoding.UTF8.GetBytes(message);
-            _channel.BasicPublish(exchange: "Test1",
-                                 routingKey: "",
-                                 basicProperties: null,
-                                 body: body);
+            if (message.Contains("Get"))
+            {
+                var body = Encoding.UTF8.GetBytes(message);
+                _channel.BasicPublish(exchange: "BestExchange",
+                                     routingKey: "Get",
+                                     basicProperties: null,
+                                     body: body);
+            }
+            else
+            {
+                var body = Encoding.UTF8.GetBytes(message);
+                _channel.BasicPublish(exchange: "BestExchange",
+                                     routingKey: "Set",
+                                     basicProperties: null,
+                                     body: body);
+            }         
         }
         public void Close()
         {
